@@ -1,0 +1,12 @@
+[project]
+name = "ip-uploader"
+version = "0.1.0"
+description = "Automatically send public IP address via email on startup"
+requires-python = ">=3.8"
+dependencies = [
+    "requests>=2.31.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
