@@ -7,17 +7,34 @@ import sys
 import os
 
 def get_public_ip():
-    try:
-        response = requests.get('https://api.ipify.org?format=json', timeout=10)
-        response.raise_for_status()
-        return response.json()['ip']
-    except Exception as e:
+    services = [
+        ('https://myip.ipip.net', 'text'),
+        ('https://ip.sb', 'text'),
+        ('https://api.ipify.org?format=json', 'json'),
+        ('https://ifconfig.me/ip', 'text'),
+    ]
+    
+    errors = []
+    for url, response_type in services:
         try:
-            response = requests.get('https://ifconfig.me/ip', timeout=10)
+            response = requests.get(url, timeout=10)
             response.raise_for_status()
-            return response.text.strip()
-        except Exception as e2:
-            raise Exception(f"Failed to get IP: {e}, {e2}")
+            
+            if response_type == 'json':
+                return response.json()['ip']
+            else:
+                ip = response.text.strip()
+                if 'ipip.net' in url:
+                    import re
+                    match = re.search(r'\d+\.\d+\.\d+\.\d+', ip)
+                    if match:
+                        return match.group(0)
+                return ip
+        except Exception as e:
+            errors.append(f"{url}: {str(e)}")
+            continue
+    
+    raise Exception(f"Failed to get IP from all services: {'; '.join(errors)}")
 
 def send_email(ip_address, smtp_server, smtp_port, sender_email, sender_password, recipient_email):
     subject = f"Public IP Address - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
