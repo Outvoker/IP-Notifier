@@ -7,7 +7,10 @@ import sys
 import os
 
 def get_public_ip():
+    import re
+    
     services = [
+        ('https://www.ip111.cn', 'text'),
         ('https://myip.ipip.net', 'text'),
         ('https://ip.sb', 'text'),
         ('https://api.ipify.org?format=json', 'json'),
@@ -24,11 +27,9 @@ def get_public_ip():
                 return response.json()['ip']
             else:
                 ip = response.text.strip()
-                if 'ipip.net' in url:
-                    import re
-                    match = re.search(r'\d+\.\d+\.\d+\.\d+', ip)
-                    if match:
-                        return match.group(0)
+                match = re.search(r'\d+\.\d+\.\d+\.\d+', ip)
+                if match:
+                    return match.group(0)
                 return ip
         except Exception as e:
             errors.append(f"{url}: {str(e)}")
